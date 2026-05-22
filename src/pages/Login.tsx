@@ -68,8 +68,8 @@ export function Login() {
 
         <div className="relative flex items-center gap-6 text-white/70 text-xs">
           <div>
-            <div className="text-white text-2xl font-bold">3</div>
-            <div>Languages supported<br/>EN · HI · TA</div>
+            <div className="text-white text-2xl font-bold">4</div>
+            <div>Languages supported<br/>EN · HI · TA · BN</div>
           </div>
           <div className="w-px h-8 bg-white/20"></div>
           <div>
