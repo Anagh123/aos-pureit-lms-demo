@@ -8,10 +8,6 @@ import {
 import { HistoricalSession, Language } from '../types';
 import { ScoreGauge } from './ScoreGauge';
 
-// One distinct colour per skill dimension (matches the Feedback scorecard) so
-// the six bars are visually separable rather than all the same colour.
-const SKILL_COLORS = ['#1a6ef5', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899', '#10b981'];
-
 const LANG_LABEL: Record<Language, string> = { en: 'English', hi: 'हिंदी', ta: 'தமிழ்', bn: 'বাংলা' };
 const LANG_COLOR: Record<Language, string> = {
   en: 'bg-blue-100 text-blue-700 border-blue-200',
@@ -146,8 +142,8 @@ export function SessionDrawer({ session, onClose }: Props) {
                     <YAxis type="category" dataKey="metric" tick={{ fontSize: 11, fill: '#475569' }} axisLine={false} tickLine={false} width={130} />
                     <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: 8, fontSize: 12 }} />
                     <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={14}>
-                      {breakdownData.map((_, i) => (
-                        <Cell key={i} fill={SKILL_COLORS[i % SKILL_COLORS.length]} />
+                      {breakdownData.map((d, i) => (
+                        <Cell key={i} fill={d.value >= 85 ? '#10b981' : d.value >= 70 ? '#1a6ef5' : d.value >= 55 ? '#f59e0b' : '#ef4444'} />
                       ))}
                     </Bar>
                   </BarChart>

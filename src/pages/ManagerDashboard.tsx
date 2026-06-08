@@ -6,7 +6,7 @@ import {
 import {
   TrendingUp, AlertTriangle, Award, Users, Search, Download,
   ChevronDown, ArrowUpRight, ArrowDownRight, MoreHorizontal,
-  GraduationCap, Bell, Eye, TrendingDown
+  GraduationCap, Eye, TrendingDown, X, MapPin, Store, Globe
 } from 'lucide-react';
 import { promoters, teamPerformanceData, categoryBreakdown } from '../data/mockData';
 import { Promoter } from '../types';
@@ -70,6 +70,7 @@ export function ManagerDashboard() {
   const [coachingAssigned, setCoachingAssigned] = useState<Set<string>>(new Set());
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [rowFeedback, setRowFeedback] = useState<Record<string, string>>({});
+  const [profilePromoter, setProfilePromoter] = useState<Promoter | null>(null);
 
   const flash = (id: string, msg: string) => {
     setOpenMenu(null);
@@ -320,13 +321,7 @@ export function ManagerDashboard() {
                               <GraduationCap size={14} className="text-brand-600" /> Assign coaching
                             </button>
                             <button
-                              onClick={() => flash(p.id, 'Reminder sent')}
-                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                            >
-                              <Bell size={14} className="text-amber-600" /> Send practice reminder
-                            </button>
-                            <button
-                              onClick={() => flash(p.id, 'Opening profile')}
+                              onClick={() => { setProfilePromoter(p); setOpenMenu(null); }}
                               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                             >
                               <Eye size={14} className="text-slate-500" /> View full profile
@@ -417,6 +412,136 @@ export function ManagerDashboard() {
           </div>
         </div>
       </div>
+
+      {profilePromoter && (
+        <ProfileModal
+          promoter={profilePromoter}
+          rank={promoters.findIndex(p => p.id === profilePromoter.id) + 1}
+          reasons={getAttentionReasons(profilePromoter)}
+          assigned={coachingAssigned.has(profilePromoter.id)}
+          onAssign={() => assignCoaching(profilePromoter.id)}
+          onClose={() => setProfilePromoter(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+const LANG_FULL: Record<string, string> = { en: 'English', hi: 'हिंदी', ta: 'தமிழ்', bn: 'বাংলা' };
+
+function ProfileModal({
+  promoter, rank, reasons, assigned, onAssign, onClose
+}: {
+  promoter: Promoter;
+  rank: number;
+  reasons: AttentionReason[];
+  assigned: boolean;
+  onAssign: () => void;
+  onClose: () => void;
+}) {
+  const trendData = promoter.weeklyTrend.map((v, i) => ({ week: `W${i + 1}`, score: v }));
+  const trendGain = promoter.weeklyTrend[promoter.weeklyTrend.length - 1] - promoter.weeklyTrend[0];
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+        <div
+          className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="relative p-6 gradient-brand text-white">
+            <button onClick={onClose} className="absolute top-4 right-4 p-1.5 hover:bg-white/20 rounded-lg">
+              <X size={18} />
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-3xl">
+                {promoter.avatar}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">{promoter.name}</h2>
+                <div className="text-sm opacity-90 flex items-center gap-3 mt-1">
+                  <span className="inline-flex items-center gap-1"><MapPin size={12} /> {promoter.region}</span>
+                  <span className="inline-flex items-center gap-1"><Globe size={12} /> {LANG_FULL[promoter.language]}</span>
+                </div>
+                <div className="text-xs opacity-80 flex items-center gap-1 mt-0.5">
+                  <Store size={11} /> {promoter.store}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-4 gap-3 mb-5">
+              <ProfileStat label="Score" value={`${promoter.overallScore}`} />
+              <ProfileStat label="Rank" value={`#${rank}`} />
+              <ProfileStat label="Sessions" value={`${promoter.sessionsCompleted}`} />
+              <ProfileStat label="Badge" value={promoter.badge} />
+            </div>
+
+            <div className="border border-slate-200 rounded-xl p-4 mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-xs uppercase tracking-wider font-bold text-slate-500">7-week score trend</h4>
+                <span className={`text-xs font-bold flex items-center gap-0.5 ${trendGain >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                  {trendGain >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {trendGain >= 0 ? '+' : ''}{trendGain} pts
+                </span>
+              </div>
+              <ResponsiveContainer width="100%" height={120}>
+                <LineChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[50, 100]} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={26} />
+                  <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                  <Line type="monotone" dataKey="score" stroke="#1a6ef5" strokeWidth={2.5} dot={{ r: 3, fill: '#1a6ef5' }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {promoter.overallScore < SCORE_TARGET && (
+              <div className="mb-5">
+                <h4 className="text-xs uppercase tracking-wider font-bold text-slate-500 mb-2">Why flagged for attention</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {reasons.map((r, i) => (
+                    <span key={i} title={r.detail} className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md border ${REASON_STYLES[r.tone]}`}>
+                      {r.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              {assigned ? (
+                <span className="flex-1 text-center px-4 py-2.5 rounded-lg bg-emerald-50 text-emerald-700 text-sm font-semibold border border-emerald-200">
+                  ✓ Coaching assigned
+                </span>
+              ) : (
+                <button
+                  onClick={onAssign}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 gradient-brand text-white rounded-lg text-sm font-semibold shadow-md shadow-brand-500/30"
+                >
+                  <GraduationCap size={15} /> Assign coaching
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-lg text-sm font-semibold text-slate-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ProfileStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-slate-50 rounded-xl p-3 text-center">
+      <div className="text-lg font-bold text-slate-900 leading-tight">{value}</div>
+      <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-500 mt-0.5">{label}</div>
     </div>
   );
 }

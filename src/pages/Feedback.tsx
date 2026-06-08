@@ -11,10 +11,6 @@ import {
 import { ScoreGauge } from '../components/ScoreGauge';
 import { Scenario, SessionResult } from '../types';
 
-// Distinct colour per skill dimension so the six bars read as separate skills
-// (previously all bars shared a colour because scores clustered near the average).
-const SKILL_COLORS = ['#1a6ef5', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899', '#10b981'];
-
 export function Feedback() {
   const navigate = useNavigate();
   const [result, setResult] = useState<SessionResult | null>(null);
@@ -133,8 +129,8 @@ export function Feedback() {
                 <YAxis type="category" dataKey="metric" tick={{ fontSize: 11, fill: '#475569' }} axisLine={false} tickLine={false} width={130} />
                 <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: 8, fontSize: 12 }} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16}>
-                  {breakdownData.map((_, i) => (
-                    <Cell key={i} fill={SKILL_COLORS[i % SKILL_COLORS.length]} />
+                  {breakdownData.map((d, i) => (
+                    <Cell key={i} fill={d.value >= 85 ? '#10b981' : d.value >= 70 ? '#1a6ef5' : d.value >= 55 ? '#f59e0b' : '#ef4444'} />
                   ))}
                 </Bar>
               </BarChart>
