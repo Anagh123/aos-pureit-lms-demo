@@ -15,6 +15,8 @@ export const currentUser = {
   streak: 12,
   sessionsThisWeek: 14,
   sessionsTarget: 20,
+  daysActiveThisWeek: 5,
+  daysTarget: 7,
   badges: ['Quick Learner', 'Objection Master', 'Top 10 — West']
 };
 

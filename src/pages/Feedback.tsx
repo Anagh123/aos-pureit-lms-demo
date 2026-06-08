@@ -11,6 +11,10 @@ import {
 import { ScoreGauge } from '../components/ScoreGauge';
 import { Scenario, SessionResult } from '../types';
 
+// Distinct colour per skill dimension so the six bars read as separate skills
+// (previously all bars shared a colour because scores clustered near the average).
+const SKILL_COLORS = ['#1a6ef5', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899', '#10b981'];
+
 export function Feedback() {
   const navigate = useNavigate();
   const [result, setResult] = useState<SessionResult | null>(null);
@@ -51,8 +55,12 @@ export function Feedback() {
   }
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}m ${s % 60}s`;
-  const grade = result.overallScore >= 90 ? 'A+' : result.overallScore >= 80 ? 'A' :
-                result.overallScore >= 70 ? 'B' : result.overallScore >= 60 ? 'C' : 'D';
+  // Encouraging, growth-oriented labels instead of letter grades like "Grade D"
+  const performanceLabel =
+    result.overallScore >= 90 ? 'Outstanding' :
+    result.overallScore >= 80 ? 'Excellent' :
+    result.overallScore >= 70 ? 'On Track' :
+    result.overallScore >= 60 ? 'Building Up' : 'Room to Grow';
 
   return (
     <div className="p-8 max-w-[1400px] mx-auto">
@@ -97,7 +105,7 @@ export function Feedback() {
           <div className="absolute inset-x-0 -top-20 h-40 gradient-brand opacity-5"></div>
           <div className="relative">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-xs font-bold mb-4">
-              <Trophy size={12} /> Grade {grade}
+              <Trophy size={12} /> {performanceLabel}
             </div>
             <ScoreGauge score={result.overallScore} size={170} label="Overall Score" thickness={12} />
             <p className="text-sm text-slate-500 mt-4 max-w-xs mx-auto">
@@ -125,8 +133,8 @@ export function Feedback() {
                 <YAxis type="category" dataKey="metric" tick={{ fontSize: 11, fill: '#475569' }} axisLine={false} tickLine={false} width={130} />
                 <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: 8, fontSize: 12 }} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16}>
-                  {breakdownData.map((d, i) => (
-                    <Cell key={i} fill={d.value >= 85 ? '#10b981' : d.value >= 70 ? '#1a6ef5' : d.value >= 55 ? '#f59e0b' : '#ef4444'} />
+                  {breakdownData.map((_, i) => (
+                    <Cell key={i} fill={SKILL_COLORS[i % SKILL_COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>

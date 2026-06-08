@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Filter, Download, X, Globe, ChevronRight, Calendar, Trash2, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Filter, Download, X, Globe, ChevronRight, Calendar, Trash2, Zap, Repeat } from 'lucide-react';
 import { SessionDrawer } from '../components/SessionDrawer';
 import { HistoricalSession, Language } from '../types';
 import { getAllSessions, getUserSessions, clearUserSessions, isUserSession } from '../data/sessionStore';
@@ -309,7 +310,7 @@ export function Reports() {
                 <th className="text-center py-3">Language</th>
                 <th className="text-center py-3">Duration</th>
                 <th className="text-center py-3">Score</th>
-                <th className="text-center py-3 pr-5"></th>
+                <th className="text-center py-3 pr-5">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -353,7 +354,17 @@ export function Reports() {
                     }`}>{s.overallScore}</span>
                   </td>
                   <td className="text-center pr-5">
-                    <ChevronRight size={14} className="text-slate-300 inline" />
+                    <div className="flex items-center justify-center gap-1">
+                      <Link
+                        to={`/simulator?scenario=${s.scenarioId}`}
+                        onClick={e => e.stopPropagation()}
+                        title="Retry this scenario"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold text-brand-600 border border-brand-200 hover:bg-brand-50 transition"
+                      >
+                        <Repeat size={12} /> Retry
+                      </Link>
+                      <ChevronRight size={14} className="text-slate-300" />
+                    </div>
                   </td>
                 </tr>
                 );

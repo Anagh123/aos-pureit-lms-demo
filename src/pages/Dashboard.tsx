@@ -21,6 +21,7 @@ const PERIOD_LABEL: Record<Period, string> = {
 
 export function Dashboard() {
   const sessionsProgress = (currentUser.sessionsThisWeek / currentUser.sessionsTarget) * 100;
+  const daysProgress = (currentUser.daysActiveThisWeek / currentUser.daysTarget) * 100;
   const recommended = scenarios.slice(0, 3);
   const [period, setPeriod] = useState<Period>('7w');
   const [selectedSession, setSelectedSession] = useState<HistoricalSession | null>(null);
@@ -72,24 +73,34 @@ export function Dashboard() {
         </div>
 
         <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-6">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs uppercase tracking-wider font-bold text-slate-500">Weekly Goal</h3>
             <Target size={16} className="text-slate-400" />
           </div>
-          <div className="text-3xl font-bold text-slate-900 mb-1">
-            {currentUser.sessionsThisWeek}<span className="text-base text-slate-400 font-medium"> / {currentUser.sessionsTarget}</span>
-          </div>
-          <div className="text-xs text-slate-500 mb-4">sessions completed</div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
-            <div
-              className="h-full gradient-brand rounded-full transition-all"
-              style={{ width: `${sessionsProgress}%` }}
-            />
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <div className="text-2xl font-bold text-slate-900 leading-none">
+                {currentUser.sessionsThisWeek}<span className="text-sm text-slate-400 font-medium"> / {currentUser.sessionsTarget}</span>
+              </div>
+              <div className="text-[11px] text-slate-500 mt-1">sessions completed</div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1.5">
+                <div className="h-full gradient-brand rounded-full transition-all" style={{ width: `${sessionsProgress}%` }} />
+              </div>
+            </div>
+            <div className="border-l border-slate-100 pl-3">
+              <div className="text-2xl font-bold text-slate-900 leading-none">
+                {currentUser.daysActiveThisWeek}<span className="text-sm text-slate-400 font-medium"> / {currentUser.daysTarget}</span>
+              </div>
+              <div className="text-[11px] text-slate-500 mt-1">days active</div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1.5">
+                <div className="h-full bg-aqua-500 rounded-full transition-all" style={{ width: `${daysProgress}%` }} />
+              </div>
+            </div>
           </div>
           <div className="grid grid-cols-7 gap-1.5">
             {[1, 1, 1, 1, 0.7, 0, 0].map((v, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
-                <div className={`w-full h-8 rounded ${v >= 1 ? 'bg-brand-500' : v > 0 ? 'bg-brand-300' : 'bg-slate-100'}`} />
+                <div className={`w-full h-7 rounded ${v >= 1 ? 'bg-brand-500' : v > 0 ? 'bg-brand-300' : 'bg-slate-100'}`} />
                 <span className="text-[10px] text-slate-400 font-medium">{['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}</span>
               </div>
             ))}

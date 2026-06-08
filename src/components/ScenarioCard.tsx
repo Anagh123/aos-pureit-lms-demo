@@ -1,4 +1,4 @@
-import { Clock, Play, Users, TrendingUp, Languages } from 'lucide-react';
+import { Clock, Play, Users, TrendingUp, Languages, Trophy } from 'lucide-react';
 import { Scenario, Language } from '../types';
 import { Link } from 'react-router-dom';
 
@@ -17,7 +17,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   Advanced: 'bg-red-50 text-red-600 border-red-200'
 };
 
-export function ScenarioCard({ scenario }: { scenario: Scenario }) {
+export function ScenarioCard({ scenario, personalBest }: { scenario: Scenario; personalBest?: number }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg hover:shadow-slate-200/50 hover:border-brand-200 transition-all group">
       <div className="flex items-start justify-between mb-3">
@@ -75,6 +75,25 @@ export function ScenarioCard({ scenario }: { scenario: Scenario }) {
           <span className="text-[10px] text-slate-400 italic ml-1">English only</span>
         )}
       </div>
+
+      {personalBest != null ? (
+        <div className="flex items-center justify-between mb-3 px-3 py-2 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+            <Trophy size={13} className="text-amber-500" /> Personal Best
+          </span>
+          <span className={`text-base font-bold ${
+            personalBest >= 85 ? 'text-emerald-600' :
+            personalBest >= 70 ? 'text-brand-600' : 'text-amber-600'
+          }`}>{personalBest}<span className="text-[11px] text-slate-400 font-medium">/100</span></span>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between mb-3 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <Trophy size={13} className="text-slate-300" /> Personal Best
+          </span>
+          <span className="text-[11px] text-slate-400 italic">Not attempted yet</span>
+        </div>
+      )}
 
       <Link
         to={`/simulator?scenario=${scenario.id}`}

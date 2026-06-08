@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Filter, Search, Languages } from 'lucide-react';
 import { scenarios } from '../data/scenarios';
 import { ScenarioCard } from '../components/ScenarioCard';
+import { getAllSessions } from '../data/sessionStore';
 import { Language } from '../types';
 
 const CATEGORIES = ['All', 'Objection Handling', 'Product Knowledge', 'Comparison', 'Closing'];
@@ -19,6 +20,15 @@ export function Scenarios() {
   const [difficulty, setDifficulty] = useState('All');
   const [language, setLanguage] = useState<'all' | Language>('all');
   const [query, setQuery] = useState('');
+
+  // Best score the user has ever achieved per scenario (live + historical sessions)
+  const personalBests = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const s of getAllSessions()) {
+      map[s.scenarioId] = Math.max(map[s.scenarioId] ?? 0, s.overallScore);
+    }
+    return map;
+  }, []);
 
   const filtered = scenarios.filter(s => {
     if (category !== 'All' && s.category !== category) return false;
@@ -127,7 +137,7 @@ export function Scenarios() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map(s => <ScenarioCard key={s.id} scenario={s} />)}
+          {filtered.map(s => <ScenarioCard key={s.id} scenario={s} personalBest={personalBests[s.id]} />)}
         </div>
       )}
     </div>
